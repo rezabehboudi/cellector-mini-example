@@ -230,7 +230,7 @@ with open(args.out_dir+"/cellector.err",'w') as err:
     with open(args.out_dir+"/cellector.out",'w') as out:
         subprocess.check_call(cellector_cmd,stdout=out, stderr=err)
 
-souporcell_bin = args.souporcell_binary if args.souporcell_binary[0] == "/" else "./"+args.souporcell_binary
+souporcell_bin = args.souporcell_binary #if args.souporcell_binary[0] == "/" else "./"+args.souporcell_binary
 souporcell_cmd = [souporcell_bin,"-a", alt_mtx, "-r", ref_mtx, "--barcodes", args.barcodes,
     "-t", str(args.threads), "-k", "2", "--min_ref", str(args.min_ref), "--min_alt", str(args.min_alt)]
 print("running souporcell")
