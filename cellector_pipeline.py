@@ -220,7 +220,7 @@ alt_mtx = args.out_dir + "/alt.mtx"
 subprocess.check_call(["cp", args.barcodes, args.out_dir+"/."])
 
 
-cellector_bin = args.cellector_binary if args.cellector_binary[0] == "/" else "./"+args.cellector_binary
+cellector_bin = args.cellector_binary # if args.cellector_binary[0] == "/" else "./"+args.cellector_binary
 cellector_cmd = [cellector_bin, "-a", alt_mtx, "-r", ref_mtx, "--output_directory",args.out_dir, 
                 "--min_alt",args.min_alt, "--min_ref", args.min_ref, "--barcodes", args.barcodes, "--vcf", final_vcf]
 
