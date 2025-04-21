@@ -1,6 +1,8 @@
 # cellector
 statistical model for finding anomalous genotype cells in mixed genotype scRNAseq data
 
+Singularity build here: https://drive.google.com/file/d/1J4zKOCv666HBQgZbO6FK8LqYaIg59nHp/view?usp=sharing
+
 From cellranger outputs (bam, cell barcodes.tsv) you can use cellector_pipeline.py with the following usage.
 ```
 ./cellector_pipeline.py -h
