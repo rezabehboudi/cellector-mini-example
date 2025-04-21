@@ -319,7 +319,7 @@ with open(args.out_dir+"final_output.out", 'w') as final_output_fid:
     for row in range(len(final_output_values)):
         final_output_fid.write("\t".join(final_output_values[row])+"\n")
 
-grapher_cmd = ["python", args.grapher_script, "-d", args.out_dir]
+grapher_cmd = [args.grapher_script, "-d", args.out_dir]
 print("running grapher")
 print(" ".join(grapher_cmd))
 with open(args.out_dir+"/grapher.err",'w') as err:
