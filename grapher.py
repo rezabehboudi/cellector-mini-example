@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # pyhton wrapper for the rust file
 
 import argparse
