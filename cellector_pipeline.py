@@ -238,7 +238,7 @@ print(" ".join(souporcell_cmd))
 with open(args.out_dir+"/souporcell.err",'w') as err:
     with open(args.out_dir+"/souporcell.out", 'w') as out:
         subprocess.check_call(souporcell_cmd, stdout=out, stderr=err)
-troublet_bin = args.troublet_binary if args.troublet_binary[0] == "/" else "./"+args.troublet_binary
+troublet_bin = args.troublet_binary #if args.troublet_binary[0] == "/" else "./"+args.troublet_binary
 troublet_cmd = [troublet_bin, "--alts", alt_mtx, "--refs", ref_mtx, "--clusters", args.out_dir+"/souporcell.out"]
 with open(args.out_dir+"/troublet.err",'w') as err:
     with open(args.out_dir+"/troublet.out", 'w') as out:
