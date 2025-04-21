@@ -16,7 +16,7 @@ parser.add_argument("--program_preference", required = False, default = "auto", 
 parser.add_argument("--ignore", required = False, default = False, type = bool, help = "set to True to ignore data error assertions")
 parser.add_argument("--cellector_binary", required=False, default = "cellector", help = "/path/to/cellector")
 parser.add_argument("--souporcell_binary", required=False, default = "souporcell", help="/path/to/souporcell")
-parser.add_argument("--troublet_binary", required=False, default = "troublet_linux", help="/path/to/troublet")
+parser.add_argument("--troublet_binary", required=False, default = "troublet", help="/path/to/troublet")
 parser.add_argument("--grapher_script", required=False, default = "grapher.py", help="/path/to/grapher.py")
 args = parser.parse_args()
 
