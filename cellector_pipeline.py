@@ -18,6 +18,7 @@ parser.add_argument("--cellector_binary", required=False, default = "cellector",
 parser.add_argument("--souporcell_binary", required=False, default = "souporcell", help="/path/to/souporcell")
 parser.add_argument("--troublet_binary", required=False, default = "troublet", help="/path/to/troublet")
 parser.add_argument("--grapher_script", required=False, default = "grapher.py", help="/path/to/grapher.py")
+parser.add_argument("--run_troublet", required=False, action="store_true", help="set this flag to run troublet doublet calling (default: off)")
 args = parser.parse_args()
 
 print("checking modules")
@@ -238,11 +239,15 @@ print(" ".join(souporcell_cmd))
 with open(args.out_dir+"/souporcell.err",'w') as err:
     with open(args.out_dir+"/souporcell.out", 'w') as out:
         subprocess.check_call(souporcell_cmd, stdout=out, stderr=err)
-troublet_bin = args.troublet_binary #if args.troublet_binary[0] == "/" else "./"+args.troublet_binary
-troublet_cmd = [troublet_bin, "--alts", alt_mtx, "--refs", ref_mtx, "--clusters", args.out_dir+"/souporcell.out"]
-with open(args.out_dir+"/troublet.err",'w') as err:
-    with open(args.out_dir+"/troublet.out", 'w') as out:
-        subprocess.check_call(troublet_cmd, stdout=out, stderr=err)
+if args.run_troublet :
+    troublet_bin = args.troublet_binary #if args.troublet_binary[0] == "/" else "./"+args.troublet_binary
+    troublet_cmd = [troublet_bin, "--alts", alt_mtx, "--refs", ref_mtx, "--clusters", args.out_dir+"/souporcell.out"]
+    with open(args.out_dir+"/troublet.err",'w') as err:
+        with open(args.out_dir+"/troublet.out", 'w') as out:
+            subprocess.check_call(troublet_cmd, stdout=out, stderr=err)
+    print("troublet executed successfully — output written to:", args.out_dir + "/troublet.out")
+
+
 
 with open(args.out_dir+"/cellector_assignments.tsv", "r") as cellector_assign_fid:
     cellector_log_likelihood_0 = []
@@ -258,20 +263,38 @@ with open(args.out_dir+"/cellector_assignments.tsv", "r") as cellector_assign_fi
         elif tokens[1] == "1":
             cellector_log_likelihood_1.append(val)
     cellector_value = abs(np.mean(cellector_log_likelihood_0) - np.mean(cellector_log_likelihood_1))
-with open(args.out_dir+"/troublet.out", "r") as troublet_assign_fid:
-    troublet_log_likelihood_0 = []
-    troublet_log_likelihood_1 = []
-    for line in troublet_assign_fid.readlines():
-        tokens = line.split("\t")
-        if tokens[1] == "singlet":
-            cluster_0_likelihood = float(tokens[7])
-            cluster_1_likelihood = float(tokens[8])
-            val = cluster_0_likelihood / np.mean([cluster_0_likelihood, cluster_1_likelihood])
-            if tokens[2] == "0":
-                troublet_log_likelihood_0.append(val)
-            elif tokens[2] == "1":
-                troublet_log_likelihood_1.append(val)
-    souporcell_value = abs(np.mean(troublet_log_likelihood_0) - np.mean(troublet_log_likelihood_1))
+
+
+if args.run_troublet:
+    with open(args.out_dir+"/troublet.out", "r") as troublet_assign_fid:
+        troublet_log_likelihood_0 = []
+        troublet_log_likelihood_1 = []
+        for line in troublet_assign_fid.readlines():
+            tokens = line.split("\t")
+            if tokens[1] == "singlet":
+                cluster_0_likelihood = float(tokens[7])
+                cluster_1_likelihood = float(tokens[8])
+                val = cluster_0_likelihood / np.mean([cluster_0_likelihood, cluster_1_likelihood])
+                if tokens[2] == "0":
+                    troublet_log_likelihood_0.append(val)
+                elif tokens[2] == "1":
+                    troublet_log_likelihood_1.append(val)
+        souporcell_value = abs(np.mean(troublet_log_likelihood_0) - np.mean(troublet_log_likelihood_1))
+else:
+    with open(args.out_dir + "/souporcell.out", "r") as souporcell_fid:
+        souporcell_log_likelihood_0 = []
+        souporcell_log_likelihood_1 = []
+        for line in souporcell_fid:
+            tokens = line.strip().split("\t")
+            cluster = tokens[1]
+            likelihood_0 = float(tokens[2])
+            likelihood_1 = float(tokens[3])
+            val = likelihood_0 / np.mean([likelihood_0, likelihood_1])
+            if cluster == "0":
+                souporcell_log_likelihood_0.append(val)
+            elif cluster == "1":
+                souporcell_log_likelihood_1.append(val)
+        souporcell_value = abs(np.mean(souporcell_log_likelihood_0) - np.mean(souporcell_log_likelihood_1))
 
 print("cellector_value: ", cellector_value)  # debugging
 print("souporcell_value: ", souporcell_value)  # debugging
@@ -280,8 +303,41 @@ if args.program_preference == "cellector" or args.program_preference == "souporc
 else:
     preference = "cellector" if cellector_value > souporcell_value else "souporcell"
 print("prefering the output of ", preference)
+
+
+summary_path = os.path.join(args.out_dir, "pipeline_summary.txt")
+with open(summary_path, "w") as summary:
+    summary.write("===== Cellector Pipeline Summary =====\n")
+    summary.write(f"Output directory: {args.out_dir}\n")
+    summary.write(f"Input BAM: {args.bam}\n")
+    summary.write(f"Barcodes file: {args.barcodes}\n")
+    summary.write(f"Reference FASTA: {args.fasta}\n")
+    summary.write(f"Common variants VCF: {args.common_variants}\n")
+    summary.write(f"Threads used: {args.threads}\n")
+    summary.write("\n--- Execution Status ---\n")
+    summary.write(f"Cellector:Executed\n")
+    summary.write(f"Souporcell:Executed\n")
+    if args.run_troublet:
+        summary.write(f"Troublet:Executed ({args.troublet_binary})\n")
+    else:
+        summary.write(f"Troublet: Skipped\n")
+    summary.write("\n--- Likelihood Separation Values ---\n")
+    summary.write(f"Cellector_value: {cellector_value:.6f}\n")
+    summary.write(f"Souporcell_value: {souporcell_value:.6f}\n")
+    summary.write("\n--- Assignment Preference ---\n")
+    summary.write(f"Preferred assignment source: {preference}\n")
+    summary.write(f"Program preference setting: {args.program_preference}\n")
+    summary.write("\n--- Grapher ---\n")
+    summary.write(f"Grapher script used: {args.grapher_script}\n")
+    summary.write(f"Graph output: {os.path.join(args.out_dir, 'iteration_*.pdf')}\n")
+    summary.write("\n===== End of Summary =====\n")
+
+print(f"Summary written to {summary_path}")
+
+
 cellector_values  = read_tsv(args.out_dir+"/cellector_assignments.tsv")
-souporcell_values = read_tsv(args.out_dir+"/troublet.out")
+souporcell_values = read_tsv(args.out_dir + ("/troublet.out" if args.run_troublet else "/souporcell.out"))
+
 final_output_values = [[] for row in cellector_values]
 final_output_values[0].append("barcode")
 final_output_values[0].append("assignment")
@@ -319,11 +375,13 @@ with open(args.out_dir+"final_output.out", 'w') as final_output_fid:
     for row in range(len(final_output_values)):
         final_output_fid.write("\t".join(final_output_values[row])+"\n")
 
-grapher_cmd = [args.grapher_script, "-d", args.out_dir]
+# grapher_cmd = [args.grapher_script, "-d", args.out_dir]
+grapher_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), args.grapher_script)
+grapher_cmd = [grapher_path, "-d", args.out_dir]
+
 print("running grapher")
 print(" ".join(grapher_cmd))
 with open(args.out_dir+"/grapher.err",'w') as err:
     with open(args.out_dir+"/grapher.out", 'w') as out:
         subprocess.check_call(grapher_cmd, stdout=out, stderr=err)
-
 
