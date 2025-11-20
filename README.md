@@ -79,4 +79,45 @@ OPTIONS:
         --posterior_threshold <posterior_threshold>
             posterior probability threshold for assignment of minority or majority (default 0.999)
 
-```
+---
+
+## Minimal Test Dataset
+
+A small test dataset is provided in the `test_data/` directory so users can quickly verify that
+`cellector_linux` is functioning correctly using the standalone executable, without requiring any full Cell Ranger outputs.
+
+### Included Files
+
+
+test_data/
+alt.mtx
+ref.mtx
+barcodes.tsv
+
+
+
+
+To run `cellector_linux` on the provided minimal test dataset, you may use either the generic template or the exact example command below.
+
+#### Generic Command Template
+
+Use this format if your files are located elsewhere:
+
+```bash
+/path/to/cellector_linux \
+    --alt /path/to/alt.mtx \
+    --ref /path/to/ref.mtx \
+    --barcodes /path/to/barcodes.tsv \
+    --output_directory /path/to/output_dir
+
+
+Example Command (using this repository’s test_data)
+If you are inside the root directory of this repository:
+
+
+```bash
+./cellector_linux \
+    --alt test_data/alt.mtx \
+    --ref test_data/ref.mtx \
+    --barcodes test_data/barcodes.tsv \
+    --output_directory example_output
