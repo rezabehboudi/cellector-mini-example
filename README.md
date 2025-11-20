@@ -76,10 +76,14 @@ OPTIONS:
         --output_directory <output_directory>
             output directory where other output files will be stored
 
+
+
         --posterior_threshold <posterior_threshold>
             posterior probability threshold for assignment of minority or majority (default 0.999)
 
 ---
+'''
+
 
 ## Minimal Test Dataset
 
@@ -115,7 +119,6 @@ Example Command (using this repository’s test_data)
 If you are inside the root directory of this repository:
 
 
-```bash
 ./cellector_linux \
     --alt test_data/alt.mtx \
     --ref test_data/ref.mtx \
