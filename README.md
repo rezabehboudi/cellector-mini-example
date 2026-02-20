@@ -145,6 +145,21 @@ input/ref/refdata-gex-GRCh38-2024-A/fasta/genome.fa
 
 ## Run with Singularity (Recommended)
 
+## Download the Singularity Image
+
+Before running the pipeline, download the pre-built Singularity image.
+
+If you do not already have `gdown` installed:
+
+```bash
+pip install gdown
+
+Then download the image:
+
+```bash
+gdown https://drive.google.com/uc?id=1J4zKOCv666HBQgZbO6FK8LqYaIg59nHp -O cellector.sif
+
+
 ```bash
 singularity exec \
   --bind $(pwd):/workspace \
