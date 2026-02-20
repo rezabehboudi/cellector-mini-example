@@ -153,11 +153,19 @@ If you do not already have `gdown` installed:
 
 ```bash
 pip install gdown
+```
 
 Then download the image:
 
 ```bash
 gdown https://drive.google.com/uc?id=1J4zKOCv666HBQgZbO6FK8LqYaIg59nHp -O cellector.sif
+```
+
+This will download the image locally as:
+
+```
+cellector.sif
+```
 
 
 ```bash
